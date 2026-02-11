@@ -27,7 +27,11 @@ def maak_rapport(transacties):
         for regel in transacties:
             categorie = regel['Categorie']
 
-            bedrag = float(regel['Bedrag'])
+            try:
+                bedrag = float(regel['Bedrag'])
+            except ValueError:
+                print(f"LET OP: Fout in regel over {regel['Omschrijving']}. Ik sla deze over.")
+                bedrag = 0.0
 
             if categorie in totalen:
                 totalen[categorie] += bedrag
