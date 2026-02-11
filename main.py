@@ -1,46 +1,93 @@
 import csv
 
+# --- CONFIGURATIE: HET REKENINGSCHEMA ---
+# Dit is de ruggengraat van je boekhouding.
+# Als penningmeester bepaal je hier welke potjes er zijn.
+GROOTBOEK = {
+    # OPBRENGSTEN (8xxx)
+    "8000": "Omzet Contributie",
+    "8010": "Omzet Bar/Kantine",
+    
+    # KOSTEN (4xxx)
+    "4500": "Kosten Huisvesting (Zaalhuur)",
+    "4600": "Kantoorkosten",
+    "4700": "Kosten Activiteiten (Boodschappen)",
+    
+    # BALANS (1xxx) - Voor later
+    "1100": "Bankrekening"
+}
+
 # --- DE HERSENEN (De Functie) ---
 # Hier definiëren we de logica. Dit blokje code doet NIETS totdat we het aanroepen.
-def bepaal_categorie(omschrijving):
-    # Alles naar kleine letters, anders is "Shell" niet gelijk aan "shell"
+def bepaal_grootboekrekening(omschrijving):
     tekst = omschrijving.lower()
 
-    # De wat-als logica
     if "albert heijn" in tekst or "jumbo" in tekst:
-        return "Boodschappen"
-    elif "shell" in tekst:
-        return "Vervoer"
-    elif "salaris" in tekst:
-        return "Inkomen"
-    else:
-        # Alles wat we niet kennen
-        return "Overig"
+        return "4700"  # Kosten Activiteiten
+        
+    elif "zaalhuur" in tekst or "sporthal" in tekst:
+        return "4500"  # Huisvesting
 
+    # --- NIEUWE REGELS ---
+    elif "shell" in tekst or "tankstation" in tekst:
+        return "4600"  # Vervoer / Kantoorkosten (even als voorbeeld)
+        
+    elif "salaris" in tekst:
+        return "8000"  # Omzet / Inkomen
+    # ---------------------
+        
+    elif "contributie" in tekst:
+        return "8000"  # Omzet
+        
+    else:
+        return "9999"  # Onbekend
+    
 # --- Calculator ---
 def maak_rapport(transacties):
-        print("\n--- Financieel overzicht ---")
+    print("\n--- GROOTBOEK OVERZICHT ---")
+    
+    # We sorteren op nummer, dat leest makkelijker voor een boekhouder
+    totalen = {}
 
-        # Start with empty dictionary
-        totalen = {}
+    for regel in transacties:
+        gb_nummer = regel['Grootboek']
+        
+        # --- HET VEILIGHEIDSNET ---
+        try:
+            # Probeer tekst naar getal te doen
+            bedrag = float(regel['Bedrag'])
+        except ValueError:
+            # Als het mislukt (bijv. "Tientje"), doe dan dit:
+            print(f"LET OP: Fout bedrag bij '{regel['Omschrijving']}'. Ik reken €0.00.")
+            bedrag = 0.0
+        # --- DE RICHTING BEPALEN (Bij/Af) ---
+        type_boeking = regel['Type'] # We kijken in de kolom 'Type'
+        
+        # Als het 'Af' is, maken we het getal negatief (keer -1)
+        if type_boeking == "Af":
+            bedrag = bedrag * -1
+        # --------------------------
 
-        for regel in transacties:
-            categorie = regel['Categorie']
+        if gb_nummer in totalen:
+            totalen[gb_nummer] += bedrag
+        else:
+            totalen[gb_nummer] = bedrag
 
-            try:
-                bedrag = float(regel['Bedrag'])
-            except ValueError:
-                print(f"LET OP: Fout in regel over {regel['Omschrijving']}. Ik sla deze over.")
-                bedrag = 0.0
+    # Nu gaan we printen, maar we zoeken de NAAM erbij in onze GROOTBOEK config
+    # We sorteren de sleutels (4500, 4700, 8000) zodat het netjes op volgorde staat
+    for nummer in sorted(totalen.keys()):
+        
+        # Haal de naam op uit de config bovenaan. 
+        # .get(nummer, "Onbekend") betekent: als nummer niet bestaat, zeg "Onbekend"
+        rekening_naam = GROOTBOEK.get(nummer, "Onbekende Rekening")
+        
+        bedrag = totalen[nummer]
+        
+        # De f-string met opmaak:
+        # {nummer:<5} betekent: reserveer 5 tekens ruimte voor het nummer (uitlijning)
+        print(f"{nummer:<5} {rekening_naam}: €{bedrag:.2f}")
 
-            if categorie in totalen:
-                totalen[categorie] += bedrag
-            else:
-                totalen[categorie] = bedrag
-
-        # Print de inhoud
-        for cat, totaal in totalen.items():
-            print(f"{cat}: €{totaal:.2f}")
+    return totalen
 
 # --- DE MOTOR (De Loop) ---
 def laad_data(bestandsnaam):
@@ -52,20 +99,17 @@ def laad_data(bestandsnaam):
 
         # Hier gebeurt de magie: regel voor regel
         for regel in lezer:
+            # LET OP: Vanaf hier alles een stukje naar rechts! (TAB)
             
-            # STAP A: Haal de omschrijving op uit de huidige regel
-            huidige_omschrijving = regel['Omschrijving']
+            # Oude code: nieuwe_categorie = bepaal_categorie(...)
+            # NIEUWE CODE:
+            gb_nummer = bepaal_grootboekrekening(regel['Omschrijving'])
             
-            # STAP B: Roep je functie aan (de hersenen)
-            nieuwe_categorie = bepaal_categorie(huidige_omschrijving)
-
-            # STAP C: Maak een NIEUWE kolom aan in het geheugen
-            # We voegen de key 'Categorie' toe aan de dictionary van deze regel
-            regel['Categorie'] = nieuwe_categorie
-
-            # STAP D: Voeg de complete regel (nu mét categorie) toe aan de lijst
+            # We slaan het op onder de kolom 'Grootboek'
+            regel['Grootboek'] = gb_nummer
+            
             transacties.append(regel)
-
+            
     return transacties
 
 # --- STARTKNOP ---
