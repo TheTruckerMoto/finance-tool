@@ -17,6 +17,27 @@ def bepaal_categorie(omschrijving):
         # Alles wat we niet kennen
         return "Overig"
 
+# --- Calculator ---
+def maak_rapport(transacties):
+        print("\n--- Financieel overzicht ---")
+
+        # Start with empty dictionary
+        totalen = {}
+
+        for regel in transacties:
+            categorie = regel['Categorie']
+
+            bedrag = float(regel['Bedrag'])
+
+            if categorie in totalen:
+                totalen[categorie] += bedrag
+            else:
+                totalen[categorie] = bedrag
+
+        # Print de inhoud
+        for cat, totaal in totalen.items():
+            print(f"{cat}: €{totaal:.2f}")
+
 # --- DE MOTOR (De Loop) ---
 def laad_data(bestandsnaam):
     print(f"Start met lezen van {bestandsnaam}...")
@@ -49,3 +70,5 @@ if __name__ == "__main__":
     
     # We printen de eerste regel om te bewijzen dat 'Categorie' nu bestaat
     print("Eerste regel met categorie:", mijn_data[0])
+
+    maak_rapport(mijn_data)
