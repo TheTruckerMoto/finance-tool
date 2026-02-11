@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Negeer ALLES wat op .csv eindigt (veiligheid!)
+*.csv
+
+# Uitzondering: Dit ene voorbeeldbestand mag wel mee
+!dummy.csv
