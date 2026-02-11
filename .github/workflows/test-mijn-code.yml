@@ -1,0 +1,32 @@
+# De naam van de workflow (zie je op GitHub)
+name: Controleer Boekhouding
+
+# WANNEER moet de robot wakker worden?
+# Hier: Bij elke 'push' naar de 'main' branch
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# WAT moet de robot doen?
+jobs:
+  # Job 1: Testen
+  bouw-en-test:
+    # Op welk besturingssysteem draait de robot?
+    runs-on: ubuntu-latest
+
+    # De stappen die de robot zet
+    steps:
+    # Stap 1: Haal de code op van GitHub (Checkout)
+    - uses: actions/checkout@v3
+
+    # Stap 2: Installeer Python
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    # Stap 3: Draai het script
+    - name: Draai het script
+      run: python main.py
