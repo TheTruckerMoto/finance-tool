@@ -1,35 +1,51 @@
 import csv
 
-def laad_data(bestandsnaam):
-    print(f"Start met lexen van {bestandsnaam}...")
+# --- DE HERSENEN (De Functie) ---
+# Hier definiëren we de logica. Dit blokje code doet NIETS totdat we het aanroepen.
+def bepaal_categorie(omschrijving):
+    # Alles naar kleine letters, anders is "Shell" niet gelijk aan "shell"
+    tekst = omschrijving.lower()
 
-    # Make emty list
+    # De wat-als logica
+    if "albert heijn" in tekst or "jumbo" in tekst:
+        return "Boodschappen"
+    elif "shell" in tekst:
+        return "Vervoer"
+    elif "salaris" in tekst:
+        return "Inkomen"
+    else:
+        # Alles wat we niet kennen
+        return "Overig"
+
+# --- DE MOTOR (De Loop) ---
+def laad_data(bestandsnaam):
+    print(f"Start met lezen van {bestandsnaam}...")
     transacties = []
 
-    # Read file (Read only because of 'r' temp file name f)
-    with open (bestandsnaam, mode='r') as f:
-
-        # Nakijekn wat een dictreader exact is..
+    with open(bestandsnaam, mode='r') as f:
         lezer = csv.DictReader(f)
 
-        # Make loop 
+        # Hier gebeurt de magie: regel voor regel
         for regel in lezer:
-            # Makes a list that appends
+            
+            # STAP A: Haal de omschrijving op uit de huidige regel
+            huidige_omschrijving = regel['Omschrijving']
+            
+            # STAP B: Roep je functie aan (de hersenen)
+            nieuwe_categorie = bepaal_categorie(huidige_omschrijving)
+
+            # STAP C: Maak een NIEUWE kolom aan in het geheugen
+            # We voegen de key 'Categorie' toe aan de dictionary van deze regel
+            regel['Categorie'] = nieuwe_categorie
+
+            # STAP D: Voeg de complete regel (nu mét categorie) toe aan de lijst
             transacties.append(regel)
 
-    # Gives info to function
-    return transacties        
+    return transacties
 
-# start actions from function
+# --- STARTKNOP ---
 if __name__ == "__main__":
-
     mijn_data = laad_data("dummy.csv")
-
-    aantal = len(mijn_data)
-
-    # Console output
-    print(f"Gevonden transacties: {aantal}")
-
-    # Console output 1st
-    print("De eerste is:", mijn_data[0])
-
+    
+    # We printen de eerste regel om te bewijzen dat 'Categorie' nu bestaat
+    print("Eerste regel met categorie:", mijn_data[0])
