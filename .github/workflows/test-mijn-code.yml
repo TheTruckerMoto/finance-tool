@@ -1,32 +1,32 @@
-# De naam van de workflow (zie je op GitHub)
+# De naam van de workflow (zichtbaar in het tabblad 'Actions')
 name: Controleer Boekhouding
 
-# WANNEER moet de robot wakker worden?
-# Hier: Bij elke 'push' naar de 'main' branch
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-# WAT moet de robot doen?
 jobs:
-  # Job 1: Testen
   bouw-en-test:
-    # Op welk besturingssysteem draait de robot?
     runs-on: ubuntu-latest
 
-    # De stappen die de robot zet
     steps:
-    # Stap 1: Haal de code op van GitHub (Checkout)
+    # Stap 1: Je code ophalen
     - uses: actions/checkout@v3
 
-    # Stap 2: Installeer Python
+    # Stap 2: Python installeren op de runner
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
 
-    # Stap 3: Draai het script
-    - name: Draai het script
-      run: python main.py
+    # Stap 3: DE CRUCIALE STAP - Installeer de bibliotheken!
+    - name: Installeer dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    # Stap 4: Check of de code technisch klopt (zonder het echt te starten)
+    - name: Syntax check (Voorkomt hangen op input)
+      run: python -m py_compile main.py factuur_maker.py

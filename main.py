@@ -1,4 +1,5 @@
 import csv
+from factuur_maker import maak_factuur
 
 # --- CONFIGURATIE: HET REKENINGSCHEMA ---
 # Dit is de ruggengraat van je boekhouding.
@@ -112,11 +113,33 @@ def laad_data(bestandsnaam):
             
     return transacties
 
+# --- Genereer factuur leden functie ---
+def genereer_contributie_facturen(bestandsnaam):
+    print(f"\n--- Facturen genereren op basis van {bestandsnaam} ---")
+    
+    with open(bestandsnaam, mode='r') as f:
+        lezer = csv.DictReader(f)
+        for regel in lezer:
+            naam = regel['Naam']
+            bedrag = float(regel['Bedrag'])
+            nummer = regel['Factuurnummer']
+            
+            # Hier gebruiken we weer onze vertrouwde factuur_maker!
+            maak_factuur(naam, bedrag, nummer)
+            print(f"Factuur aangemaakt voor {naam}")
+
+
 # --- STARTKNOP ---
 if __name__ == "__main__":
-    mijn_data = laad_data("dummy.csv")
+    print("1. Bankgegevens analyseren (dummy.csv)")
+    print("2. Contributiefacturen maken (leden.csv)")
     
-    # We printen de eerste regel om te bewijzen dat 'Categorie' nu bestaat
-    print("Eerste regel met categorie:", mijn_data[0])
+    keuze = input("Wat wil je doen? (1/2): ")
 
-    maak_rapport(mijn_data)
+    if keuze == "1":
+        mijn_data = laad_data("dummy.csv")
+        maak_rapport(mijn_data)
+    elif keuze == "2":
+        genereer_contributie_facturen("leden.csv")
+    else:
+        print("Ongeldige keuze.")
