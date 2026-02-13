@@ -90,6 +90,12 @@ def maak_rapport(transacties):
 
     return totalen
 
+def log_factuur(naam, bedrag, nummer):
+    # 'a' staat voor 'append' (toevoegen onderaan het bestand)
+    with open('facturen_log.csv', mode='a', newline='') as f:
+        schrijver = csv.writer(f)
+        schrijver.writerow([naam, bedrag, nummer, "Aangemaakt"])
+
 # --- DE MOTOR (De Loop) ---
 def laad_data(bestandsnaam):
     print(f"Start met lezen van {bestandsnaam}...")
@@ -126,6 +132,7 @@ def genereer_contributie_facturen(bestandsnaam):
             
             # Hier gebruiken we weer onze vertrouwde factuur_maker!
             maak_factuur(naam, bedrag, nummer)
+            log_factuur(naam, bedrag, nummer)
             print(f"Factuur aangemaakt voor {naam}")
 
 
