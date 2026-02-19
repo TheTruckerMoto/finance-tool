@@ -213,6 +213,7 @@ __marimo__/
 # Uitzondering: Dit ene voorbeeldbestand mag wel mee
 !dummy.csv
 
+
 # Negeer de virtual environment map
 .venv
 
